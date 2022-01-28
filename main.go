@@ -13,43 +13,43 @@ import (
 
 const Version = "v0.0.0-alpha"
 
-//create session
-var Session, _ = discordgo.New()
+//TODO: move bot instantiation into this as a wrapper that can be called in init. issue rn is I need dg to be referenceable outside of init, otherwise I would spawn it there. current issue is idk the type of the dg bot. realllly should, but its a pointer to a Session object defined somewhere deep in the lib.
+func botGen() {
 
-// Read in all configuration options from both environment variables and
-// command line arguments.
+}
+
 func init() {
-	var err error
-	Session.Token = ""
-
 	// Discord Authentication Token
 	// Print out a fancy logo!
 	fmt.Printf(`Science Defender %-16s\/`+"\n\n", Version)
 
 	//Load dotenv file from .
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
-	}
-
-	//Load Token from env (simulated with godotenv)
-	Session.Token = os.Getenv("BOT_TOKEN")
-	if Session.Token == "" {
-		log.Fatal("Error loading token from env file")
-		return
 	}
 }
 
 func main() {
-	//Declarations
-	var err error
+	//Bot session instance
+	var dg, err = discordgo.New()
 
-	Session.AddHandler(messageCreate)
-	// In this example, we only care about receiving message events.
-	Session.Identify.Intents = discordgo.IntentsGuildMessages
+	//Load Token from env (simulated with godotenv)
+	dg.Token = os.Getenv("BOT_TOKEN")
+	if dg.Token == "" {
+		log.Fatal("Error loading token from env file")
+		os.Exit(1)
+	}
+
+	//Add Event Handler Functions
+	dg.AddHandler(messageCreateHandler) //use for message create events
+
+	//Register Bot Intents with Discord
+	//worth noting MakeIntent is a no-op, but I want it there for doing something with pointers later
+	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
 
 	// Open a websocket connection to Discord
-	err = Session.Open()
+	err = dg.Open()
 	if err != nil {
 		log.Printf("error opening connection to Discord, %s\n", err)
 		os.Exit(1)
@@ -62,19 +62,21 @@ func main() {
 	<-sc
 
 	// Clean up
-	Session.Close()
+	dg.Close()
 
 	// Exit Normally.
 	//exit
 
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+//<----------------------> HANDLERS <---------------------->
+
+func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
-	if m.Author.ID == s.State.User.ID {
-		return
-	}
+	// if m.Author.ID == s.State.User.ID {
+	// 	return
+	// }
 	// If the message is "ping" reply with "Pong!"
 	if m.Content == "ping" {
 		s.ChannelMessageSend(m.ChannelID, "Pong!")
