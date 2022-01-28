@@ -5,44 +5,100 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+
+	"github.com/Necroforger/dgrouter"
+
+	"github.com/Necroforger/dgrouter/exrouter"
 )
 
 const Version = "v0.0.0-alpha"
 
-//TODO: move bot instantiation into this as a wrapper that can be called in init. issue rn is I need dg to be referenceable outside of init, otherwise I would spawn it there. current issue is idk the type of the dg bot. realllly should, but its a pointer to a Session object defined somewhere deep in the lib.
-func botGen() {
+//var dg *discordgo.Session
+var BOTID string
+var PREFIX string
+var TOKEN string
+var FITE string
+var ADMIN string
 
-}
+//TODO: move bot instantiation into this as a wrapper that can be called in init. issue rn is I need dg to be referenceable outside of init, otherwise I would spawn it there. current issue is idk the type of the dg bot. realllly should, but its a pointer to a Session object defined somewhere deep in the lib.
 
 func init() {
 	// Discord Authentication Token
 	// Print out a fancy logo!
-	fmt.Printf(`Science Defender %-16s\/`+"\n\n", Version)
+	fmt.Printf(`Science Defender! %-16s\/`+"\n\n", Version)
 
 	//Load dotenv file from .
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-}
-
-func main() {
-	//Bot session instance
-	var dg, err = discordgo.New()
-
 	//Load Token from env (simulated with godotenv)
-	dg.Token = os.Getenv("BOT_TOKEN")
-	if dg.Token == "" {
+	TOKEN = os.Getenv("BOT_TOKEN")
+	if TOKEN == "" {
 		log.Fatal("Error loading token from env file")
 		os.Exit(1)
 	}
 
+	PREFIX = "?"
+	FITE = ""
+	ADMIN = "Spagett#7559"
+}
+
+func main() {
+	var dg, err = discordgo.New("Bot " + TOKEN)
+	if err != nil {
+		log.Fatal("Error creating discordgo session!")
+		os.Exit(1)
+	}
+
+	var router = exrouter.New()
+
+	//Add regex routes to router
+
+	// Add some commands
+	router.On("ping", func(ctx *exrouter.Context) {
+		ctx.Reply("pong")
+	}).Desc("responds with pong")
+
+	router.On("avatar", func(ctx *exrouter.Context) {
+		ctx.Reply(ctx.Msg.Author.AvatarURL("2048"))
+	}).Desc("returns the user's avatar")
+
+	// Match the regular expression user(name)?
+	router.OnMatch("username", dgrouter.NewRegexMatcher("user(name)?"), func(ctx *exrouter.Context) {
+		ctx.Reply("Your username is " + ctx.Msg.Author.Username)
+	})
+
+	// Match the regular expression user(name)?
+	router.OnMatch("fite", dgrouter.NewRegexMatcher(`
+	(fite)+:[\w]+#\d\d\d\d?
+	`), func(ctx *exrouter.Context) {
+		ctx.Reply("Hit") //print debug
+		if ctx.Msg.Author.Username == string(ADMIN) {
+			FITE = strings.Split(ctx.Msg.Content, ":")[1]
+			ctx.Reply("Now configured to argue with: " + FITE)
+		}
+
+	}).Desc("Configures who this bot will fight with. Must be a greenlisted user to use")
+
+	router.Default = router.On("help", func(ctx *exrouter.Context) {
+		var text = ""
+		for _, v := range router.Routes {
+			text += v.Name + " : \t" + v.Description + "\n"
+		}
+		ctx.Reply("```" + text + "```")
+	}).Desc("prints this help menu")
+
 	//Add Event Handler Functions
 	dg.AddHandler(messageCreateHandler) //use for message create events
+	dg.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
+		router.FindAndExecute(dg, PREFIX, dg.State.User.ID, m.Message)
+	})
 
 	//Register Bot Intents with Discord
 	//worth noting MakeIntent is a no-op, but I want it there for doing something with pointers later
@@ -57,6 +113,7 @@ func main() {
 
 	// Wait for a CTRL-C
 	log.Printf(`Now running. Press CTRL-C to exit.`)
+
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -78,13 +135,13 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// 	return
 	// }
 	// If the message is "ping" reply with "Pong!"
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
+	// if m.Content == "ping" {
+	// 	s.ChannelMessageSend(m.ChannelID, "Pong!")
+	// }
 
-	// If the message is "pong" reply with "Ping!"
-	if m.Content == "pong" {
-		s.ChannelMessageSend(m.ChannelID, "Ping!")
-	}
+	// // If the message is "pong" reply with "Ping!"
+	// if m.Content == "pong" {
+	// 	s.ChannelMessageSend(m.ChannelID, "Ping!")
+	// }
 
 }
