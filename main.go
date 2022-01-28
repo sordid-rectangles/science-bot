@@ -13,10 +13,16 @@ import (
 
 const Version = "v0.0.0-alpha"
 
-func main() {
-	//Declarations
-	var err error
+//create session
+var Session, _ = discordgo.New()
 
+// Read in all configuration options from both environment variables and
+// command line arguments.
+func init() {
+	var err error
+	Session.Token = ""
+
+	// Discord Authentication Token
 	// Print out a fancy logo!
 	fmt.Printf(`Science Defender %-16s\/`+"\n\n", Version)
 
@@ -26,16 +32,17 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	//create session
-	var Session, _ = discordgo.New()
-	Session.Token = ""
-
 	//Load Token from env (simulated with godotenv)
 	Session.Token = os.Getenv("BOT_TOKEN")
 	if Session.Token == "" {
 		log.Fatal("Error loading token from env file")
 		return
 	}
+}
+
+func main() {
+	//Declarations
+	var err error
 
 	// Open a websocket connection to Discord
 	err = Session.Open()
