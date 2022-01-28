@@ -25,10 +25,7 @@ var TOKEN string
 var FITE string
 var ADMIN string
 
-//TODO: move bot instantiation into this as a wrapper that can be called in init. issue rn is I need dg to be referenceable outside of init, otherwise I would spawn it there. current issue is idk the type of the dg bot. realllly should, but its a pointer to a Session object defined somewhere deep in the lib.
-
 func init() {
-	// Discord Authentication Token
 	// Print out a fancy logo!
 	fmt.Printf(`Science Defender! %-16s\/`+"\n\n", Version)
 
@@ -44,22 +41,28 @@ func init() {
 		os.Exit(1)
 	}
 
+	//Set some constants
+	//TODO: move this into the .env and other more cleaned up config areas
 	PREFIX = "?"
 	FITE = ""
 	ADMIN = "Spagett#7559"
 }
 
 func main() {
+
+	//Instantiation of core tools
+
+	//Configure discordgo session bot
 	var dg, err = discordgo.New("Bot " + TOKEN)
 	if err != nil {
 		log.Fatal("Error creating discordgo session!")
 		os.Exit(1)
 	}
 
+	//configure dgrouter instance
 	var router = exrouter.New()
 
 	//Add regex routes to router
-
 	// Add some commands
 	router.On("ping", func(ctx *exrouter.Context) {
 		ctx.Reply("pong")
@@ -83,7 +86,6 @@ func main() {
 			FITE = strings.Split(ctx.Msg.Content, ":")[1]
 			ctx.Reply("Now configured to argue with: " + FITE)
 		}
-
 	}).Desc("Configures who this bot will fight with. Must be a greenlisted user to use")
 
 	router.Default = router.On("help", func(ctx *exrouter.Context) {
