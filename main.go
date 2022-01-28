@@ -45,7 +45,7 @@ func init() {
 	//TODO: move this into the .env and other more cleaned up config areas
 	PREFIX = "?"
 	FITE = ""
-	ADMIN = "Spagett#7559"
+	ADMIN = "444543604547911680"
 }
 
 func main() {
@@ -78,11 +78,10 @@ func main() {
 	})
 
 	// Match the regular expression user(name)?
-	router.OnMatch("fite", dgrouter.NewRegexMatcher(`
-	(fite)+:[\w]+#\d\d\d\d?
-	`), func(ctx *exrouter.Context) {
+	router.OnMatch("fite", dgrouter.NewRegexMatcher(`(fite)+:[\w]+#\d\d\d\d?`), func(ctx *exrouter.Context) {
 		ctx.Reply("Hit") //print debug
-		if ctx.Msg.Author.Username == string(ADMIN) {
+		ctx.Reply(ctx.Msg.Author.ID)
+		if ctx.Msg.Author.ID == string(ADMIN) {
 			FITE = strings.Split(ctx.Msg.Content, ":")[1]
 			ctx.Reply("Now configured to argue with: " + FITE)
 		}
