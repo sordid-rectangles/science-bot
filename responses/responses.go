@@ -1,4 +1,4 @@
-package main
+package responses
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ var simpleRes = [...]string{
 //TODO: genResponse(type string) (string, error) {}
 
 //TODO: getSimple(ID int) (string, error) {}
-func getSimple(id int) (string, error) {
+func GetSimple(id int) (string, error) {
 	if id >= len(simpleRes) {
 		return "", errors.New("Failed to retrieve simple response, Id out of bounds")
 	} else {
@@ -24,11 +24,11 @@ func getSimple(id int) (string, error) {
 }
 
 //TODO: randSimple() (string, error) {}
-func randSimple() (string, error) {
+func RandSimple() (string, error) {
 	rand.Seed(time.Now().UnixNano())
 	l := len(simpleRes)
 	i := rand.Intn(l)
-	return getSimple(i)
+	return GetSimple(i)
 }
 
 //TODO: genProse( seed string) string {}

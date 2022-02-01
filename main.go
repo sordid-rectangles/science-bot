@@ -14,6 +14,7 @@ import (
 	"github.com/Necroforger/dgrouter"
 
 	"github.com/Necroforger/dgrouter/exrouter"
+	"github.com/sordid-rectangles/science-bot/responses"
 )
 
 const Version = "v0.0.0-alpha"
@@ -47,9 +48,14 @@ func init() {
 		os.Exit(1)
 	}
 
+	PREFIX = os.Getenv("CMD_PREFIX")
+	if ADMIN == "" {
+		log.Fatal("Error loading admin id from env file")
+		os.Exit(1)
+	}
+
 	//Set some constants
 	//TODO: move this into the .env and other more cleaned up config areas
-	PREFIX = "?"
 	FITE = ""
 }
 
@@ -146,7 +152,7 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if m.Author.Username == FITE {
 		// s.ChannelMessageSendReply(m.ChannelID, "Ummmmmm actually that is incorrect, also don't care, also ratio", m.MessageReference)
-		r, err := randSimple()
+		r, err := responses.RandSimple()
 		if err != nil {
 			fmt.Println(err)
 			log.Println(err)
