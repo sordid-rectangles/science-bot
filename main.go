@@ -41,11 +41,16 @@ func init() {
 		os.Exit(1)
 	}
 
+	ADMIN = os.Getenv("ADMIN_ID")
+	if ADMIN == "" {
+		log.Fatal("Error loading admin id from env file")
+		os.Exit(1)
+	}
+
 	//Set some constants
 	//TODO: move this into the .env and other more cleaned up config areas
 	PREFIX = "?"
 	FITE = ""
-	ADMIN = "444543604547911680"
 }
 
 func main() {
@@ -79,11 +84,14 @@ func main() {
 
 	// Match the regular expression user(name)?
 	router.OnMatch("fite", dgrouter.NewRegexMatcher(`(fite)+:[\w]+#\d\d\d\d?`), func(ctx *exrouter.Context) {
-		ctx.Reply("Hit") //print debug
-		ctx.Reply(ctx.Msg.Author.ID)
+		//ctx.Reply("Hit") //print debug
 		if ctx.Msg.Author.ID == string(ADMIN) {
-			FITE = strings.Split(ctx.Msg.Content, ":")[1]
+
+			//format of input is ?fite:<username>#<discordnumberthing>
+			//split on :, grab everything right of it, then split on # and grab the username
+			FITE = strings.Split(strings.Split(ctx.Msg.Content, ":")[1], "#")[0]
 			ctx.Reply("Now configured to argue with: " + FITE)
+
 		}
 	}).Desc("Configures who this bot will fight with. Must be a greenlisted user to use")
 
@@ -132,17 +140,34 @@ func main() {
 func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
-	// if m.Author.ID == s.State.User.ID {
-	// 	return
-	// }
-	// If the message is "ping" reply with "Pong!"
-	// if m.Content == "ping" {
-	// 	s.ChannelMessageSend(m.ChannelID, "Pong!")
-	// }
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
 
-	// // If the message is "pong" reply with "Ping!"
-	// if m.Content == "pong" {
-	// 	s.ChannelMessageSend(m.ChannelID, "Ping!")
-	// }
-
+	if m.Author.Username == FITE {
+		// s.ChannelMessageSendReply(m.ChannelID, "Ummmmmm actually that is incorrect, also don't care, also ratio", m.MessageReference)
+		r, err := randSimple()
+		if err != nil {
+			fmt.Println(err)
+			log.Println(err)
+		} else {
+			s.ChannelMessageSendReply(m.ChannelID, r, m.MessageReference)
+		}
+	}
 }
+
+//Some misc example code I'm going to keep here for reference for now
+// Ignore all messages created by the bot itself
+// This isn't required in this specific example but it's a good practice.
+// if m.Author.ID == s.State.User.ID {
+// 	return
+// }
+// If the message is "ping" reply with "Pong!"
+// if m.Content == "ping" {
+// 	s.ChannelMessageSend(m.ChannelID, "Pong!")
+// }
+
+// // If the message is "pong" reply with "Ping!"
+// if m.Content == "pong" {
+// 	s.ChannelMessageSend(m.ChannelID, "Ping!")
+// }
