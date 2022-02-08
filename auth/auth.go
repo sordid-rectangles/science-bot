@@ -5,6 +5,22 @@ var Users struct {
 	OWNER  map[string]string
 }
 
+func SetMaps(admins *map[string]string, owner *map[string]string) {
+	Users.ADMINS = *admins
+	Users.OWNER = *owner
+}
+
+func SetOwner(id string, name string) error {
+	_, ok := Users.OWNER[id]
+	if ok {
+		return nil
+	} else {
+		Users.OWNER[id] = name
+		//todo: also update the db
+		return nil
+	}
+}
+
 //TODO: func IsOwner (id string) (bool, error) {}
 func IsOwner(id string) (bool, error) {
 	_, ok := Users.OWNER[id]
@@ -38,11 +54,11 @@ func IsAuthed(id string) (bool, error) {
 
 //TODO: RegisterAdmin (id string, name string) (error) {}
 func RegisterAdmin(id string, name string) error {
-	val, ok := Users.ADMINS[id]
+	_, ok := Users.ADMINS[id]
 	if ok {
 		return nil
 	} else {
-		Users.ADMINS[id] = val
+		Users.ADMINS[id] = name
 		//todo: also update the db
 		return nil
 	}

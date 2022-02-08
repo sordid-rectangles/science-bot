@@ -32,3 +32,7 @@ func RandSimple() (string, error) {
 }
 
 //TODO: genProse( seed string) string {}
+func GenProse(seed string) (string, error) {
+
+	return "NOT YET IMPLEMENTED ; (", nil
+}
