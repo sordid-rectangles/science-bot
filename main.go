@@ -209,15 +209,20 @@ var (
 		},
 		"admins": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var content string
-			if len(auth.Users.ADMINS) == 0 {
-				content = "No Admins currently registered ;-("
-			} else {
-				content = "Current admin users are: \n"
-				for id, name := range auth.Users.ADMINS {
-					content += fmt.Sprintf("name: %s, ID: %s \n", name, id)
-				}
-			}
 
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				if len(auth.Users.ADMINS) == 0 {
+					content = "No Admins currently registered ;-("
+				} else {
+					content = "Current admin users are: \n"
+					for id, name := range auth.Users.ADMINS {
+						content += fmt.Sprintf("name: %s, ID: %s \n", name, id)
+					}
+				}
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -228,9 +233,14 @@ var (
 		"register-admin": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
 
-			content := `%s registered as an admin`
-
-			auth.RegisterAdmin(user.ID, user.Username)
+			var content string
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				content = `%s registered as an admin`
+				auth.RegisterAdmin(user.ID, user.Username)
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -241,10 +251,15 @@ var (
 		},
 		"remove-admin": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
+			var content string
 
-			content := `%s removed as an admin`
-
-			auth.RemoveAdmin(user.ID)
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				content = `%s removed as an admin`
+				auth.RemoveAdmin(user.ID)
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -256,10 +271,15 @@ var (
 		"register-fite-user": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
 			mode := i.ApplicationCommandData().Options[1].IntValue()
+			var content string
 
-			_ = registerFite(user.ID, user.Username, int(mode))
-
-			content := `%s registered as a target in mode %d `
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				_ = registerFite(user.ID, user.Username, int(mode))
+				content = `%s registered as a target in mode %d `
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -270,10 +290,15 @@ var (
 		},
 		"remove-fite-user": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
+			var content string
 
-			_ = removeFite(user.ID)
-
-			content := `%s removed as a target`
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				_ = removeFite(user.ID)
+				content = `%s removed as a target`
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -285,9 +310,15 @@ var (
 		"register-response": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			res := i.ApplicationCommandData().Options[0].StringValue()
 
-			responses.AddResponse(res)
+			var content string
 
-			content := `%s registered as a response`
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				responses.AddResponse(res)
+				content = `%s registered as a response`
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -298,14 +329,20 @@ var (
 		},
 		"bot-responses": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var content string
-			if len(responses.SimpleRes) == 0 {
-				content = "No responses currently registered ;-("
-			} else {
-				content = "Current responses are: \n"
-				for i := range responses.SimpleRes {
-					res := responses.SimpleRes[i]
-					content += fmt.Sprintf("Response %d: %s \n", i, res)
+
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				if len(responses.SimpleRes) == 0 {
+					content = "No responses currently registered ;-("
+				} else {
+					content = "Current responses are: \n"
+					for i := range responses.SimpleRes {
+						res := responses.SimpleRes[i]
+						content += fmt.Sprintf("Response %d: %s \n", i, res)
+					}
 				}
+			} else {
+				content = `Peasant, you are not authorized.`
 			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
