@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var simpleRes = [...]string{
+var SimpleRes = []string{
 	"Ummmmmmm actually that is incorrect, also don't care, also ratio",
 	"No, I don't believe that's correct",
 	"Hmmm, maybe speak less, it's unbecoming",
@@ -16,17 +16,17 @@ var simpleRes = [...]string{
 
 //TODO: getSimple(ID int) (string, error) {}
 func GetSimple(id int) (string, error) {
-	if id >= len(simpleRes) {
+	if id >= len(SimpleRes) {
 		return "", errors.New("Failed to retrieve simple response, Id out of bounds")
 	} else {
-		return simpleRes[id], nil
+		return SimpleRes[id], nil
 	}
 }
 
 //TODO: randSimple() (string, error) {}
 func RandSimple() (string, error) {
 	rand.Seed(time.Now().UnixNano())
-	l := len(simpleRes)
+	l := len(SimpleRes)
 	i := rand.Intn(l)
 	return GetSimple(i)
 }
@@ -35,4 +35,11 @@ func RandSimple() (string, error) {
 func GenProse(seed string) (string, error) {
 
 	return "NOT YET IMPLEMENTED ; (", nil
+}
+
+//TODO: addResponse(res string) {}
+func AddResponse(res string) {
+	if res != "" {
+		SimpleRes = append(SimpleRes, res)
+	}
 }

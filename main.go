@@ -18,7 +18,7 @@ type FiteUser struct {
 	_mode int
 }
 
-const Version = "v0.0.0-alpha"
+const Version = "v0.0.1-alpha"
 
 var dg *discordgo.Session
 var BOTID string
@@ -27,12 +27,7 @@ var TOKEN string
 var FITE map[string]FiteUser = make(map[string]FiteUser)
 var ADMINS map[string]string = make(map[string]string)
 var OWNER map[string]string = make(map[string]string)
-
-var (
-	GuildID        string
-	BotToken       string
-	RemoveCommands bool
-)
+var GUILDID string = "" //really only useful to guild-scope application commands, which is useful in dev to get them to update instantly rather than 1hr
 
 func init() {
 	// Print out a fancy logo!
@@ -44,34 +39,31 @@ func init() {
 	//Load dotenv file from .
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file, trying env variables")
 	}
 	//Load Token from env (simulated with godotenv)
 	TOKEN = os.Getenv("BOT_TOKEN")
 	if TOKEN == "" {
-		log.Fatal("Error loading token from env file")
+		log.Fatal("Error loading token from env")
 		os.Exit(1)
 	}
 
 	OWNER_ID := os.Getenv("OWNER_ID")
 	if OWNER_ID == "" {
-		log.Fatal("Error loading admin id from env file")
+		log.Fatal("Error loading admin id from env")
 		os.Exit(1)
 	}
 	OWNER_NAME := os.Getenv("OWNER_NAME")
 	if OWNER_NAME == "" {
-		log.Fatal("Error loading admin id from env file")
+		log.Fatal("Error loading admin id from env")
 		os.Exit(1)
 	}
 
-	PREFIX = os.Getenv("CMD_PREFIX")
-	if PREFIX == "" {
-		log.Fatal("Error loading admin id from env file")
-		os.Exit(1)
-	}
-
-	BotToken = TOKEN
-	RemoveCommands = true
+	// PREFIX = os.Getenv("CMD_PREFIX")
+	// if PREFIX == "" {
+	// 	log.Fatal("Error loading admin id from env file")
+	// 	os.Exit(1)
+	// }
 
 	//Set some constants
 	//TODO: move this into the .env and other more cleaned up config areas
@@ -182,6 +174,25 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "register-response",
+			Description: "Register a new bot response",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "response-string",
+					Description: "response string to be added to the simpleRes list",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Name: "bot-responses",
+			// All commands and options must have a description
+			// Commands/options without description will fail the registration
+			// of the command.
+			Description: "Returns the list of strings registered as responses",
+		},
 	}
 
 	//<------------------->Command Handler Function Creation<------------------->
@@ -257,6 +268,52 @@ var (
 				},
 			})
 		},
+		"remove-fite-user": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			user := i.ApplicationCommandData().Options[0].UserValue(s)
+
+			_ = removeFite(user.ID)
+
+			content := `%s removed as a target`
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf(content, user),
+				},
+			})
+		},
+		"register-response": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			res := i.ApplicationCommandData().Options[0].StringValue()
+
+			responses.AddResponse(res)
+
+			content := `%s registered as a response`
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf(content, res),
+				},
+			})
+		},
+		"bot-responses": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var content string
+			if len(responses.SimpleRes) == 0 {
+				content = "No responses currently registered ;-("
+			} else {
+				content = "Current responses are: \n"
+				for i := range responses.SimpleRes {
+					res := responses.SimpleRes[i]
+					content += fmt.Sprintf("Response %d: %s \n", i, res)
+				}
+			}
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: content,
+				},
+			})
+		},
 	}
 )
 
@@ -267,11 +324,13 @@ func init() {
 		log.Fatal("Error creating discordgo session!")
 		os.Exit(1)
 	}
+
 	// dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	// 	if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
 	// 		h(s, i)
 	// 	}
 	// })
+
 }
 
 func main() {
@@ -300,23 +359,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Wait for a CTRL-C
-	log.Printf(`Now running. Press CTRL-C to exit.`)
-
-	GuildID = ""
 	for _, v := range commands {
-		_, err := dg.ApplicationCommandCreate(dg.State.User.ID, GuildID, v)
+		_, err := dg.ApplicationCommandCreate(dg.State.User.ID, GUILDID, v)
+
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
 	}
 
-	// sc := make(chan os.Signal, 1)
-	// signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	// <-sc
+	//Experimenting with overwrite to ensure fresh commands.
+	// _, err = dg.ApplicationCommandBulkOverwrite(dg.State.User.ID, GUILDID, commands)
+	// if err != nil {
+	// 	log.Panicf("Cannot bulk overwrite commands!!")
+	// }
 
-	// // Clean up
-	// dg.Close()
+	// Wait for a CTRL-C
+	log.Printf(`Now running. Press CTRL-C to exit.`)
+
 	defer dg.Close()
 
 	stop := make(chan os.Signal)
@@ -333,21 +392,18 @@ func main() {
 
 func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
-	// This isn't required in this specific example but it's a good practice.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	//println("hit")
+
+	//If the sender is a FITE target, grab their mode and respond accordingly
 	fiter, ok := FITE[string(m.Author.ID)]
-	//print(ok)
 	if ok {
-		//println("hit ok")
-		// s.ChannelMessageSendReply(m.ChannelID, "Ummmmmm actually that is incorrect, also don't care, also ratio", m.MessageReference)
 		var r string
 		var err error
 		switch fiter._mode {
 
-		//cases defined in the register fite user slash command
+		//cases defined in the register fite user slash command. TODO: make this defined by an interface or something
 		case 0: //simple response mode
 			r, err = responses.RandSimple()
 			if err != nil {
@@ -386,11 +442,7 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println(err)
 			log.Println(err)
 		} else {
-			//println("hit res")
-			println(r)
-
-			//println(mess)
-			//println(err)
+			//Message handler ran without error. maybe do something idk
 		}
 	}
 }
@@ -407,18 +459,10 @@ func registerFite(id string, name string, mode int) error {
 	}
 }
 
-//Some misc example code I'm going to keep here for reference for now
-// Ignore all messages created by the bot itself
-// This isn't required in this specific example but it's a good practice.
-// if m.Author.ID == s.State.User.ID {
-// 	return
-// }
-// If the message is "ping" reply with "Pong!"
-// if m.Content == "ping" {
-// 	s.ChannelMessageSend(m.ChannelID, "Pong!")
-// }
-
-// // If the message is "pong" reply with "Ping!"
-// if m.Content == "pong" {
-// 	s.ChannelMessageSend(m.ChannelID, "Ping!")
-// }
+func removeFite(id string) error {
+	_, ok := FITE[id]
+	if ok {
+		delete(FITE, id)
+	}
+	return nil
+}
