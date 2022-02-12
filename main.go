@@ -236,7 +236,7 @@ var (
 			var content string
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
-				content = `%s registered as an admin`
+				content = user.Username + ` registered as an admin`
 				auth.RegisterAdmin(user.ID, user.Username)
 			} else {
 				content = `Peasant, you are not authorized.`
@@ -245,7 +245,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(content, user),
+					Content: fmt.Sprintf(content),
 				},
 			})
 		},
@@ -255,7 +255,7 @@ var (
 
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
-				content = `%s removed as an admin`
+				content = user.Username + `removed as an admin`
 				auth.RemoveAdmin(user.ID)
 			} else {
 				content = `Peasant, you are not authorized.`
@@ -264,7 +264,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(content, user),
+					Content: fmt.Sprintf(content),
 				},
 			})
 		},
@@ -276,7 +276,7 @@ var (
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
 				_ = registerFite(user.ID, user.Username, int(mode))
-				content = `%s registered as a target in mode %d `
+				content = user.Username + ` registered as a target in mode ` + string(mode)
 			} else {
 				content = `Peasant, you are not authorized.`
 			}
@@ -284,7 +284,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(content, user, mode),
+					Content: fmt.Sprintf(content),
 				},
 			})
 		},
@@ -315,7 +315,7 @@ var (
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
 				responses.AddResponse(res)
-				content = `%s registered as a response`
+				content = res + ` registered as a response`
 			} else {
 				content = `Peasant, you are not authorized.`
 			}
@@ -323,7 +323,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(content, res),
+					Content: fmt.Sprintf(content),
 				},
 			})
 		},
