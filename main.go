@@ -276,7 +276,7 @@ var (
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
 				_ = registerFite(user.ID, user.Username, int(mode))
-				content = user.Username + ` registered as a target in mode ` + string(mode)
+				content = fmt.Sprintf(`%s registered as a target in mode %d`, user.Username, mode)
 			} else {
 				content = `Peasant, you are not authorized.`
 			}
