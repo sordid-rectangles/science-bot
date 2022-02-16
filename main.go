@@ -193,6 +193,13 @@ var (
 			// of the command.
 			Description: "Returns the list of strings registered as responses",
 		},
+		{
+			Name: "fite-targets",
+			// All commands and options must have a description
+			// Commands/options without description will fail the registration
+			// of the command.
+			Description: "Returns the list of users registered as targets",
+		},
 	}
 
 	//<------------------->Command Handler Function Creation<------------------->
@@ -339,6 +346,29 @@ var (
 					for i := range responses.SimpleRes {
 						res := responses.SimpleRes[i]
 						content += fmt.Sprintf("Response %d: %s \n", i, res)
+					}
+				}
+			} else {
+				content = `Peasant, you are not authorized.`
+			}
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: content,
+				},
+			})
+		},
+		"fite-targets": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var content string
+
+			a, _ := auth.IsAuthed(i.Member.User.ID)
+			if a {
+				if len(responses.SimpleRes) == 0 {
+					content = "No responses currently registered ;-("
+				} else {
+					content = "Current fite users are: \n"
+					for _, user := range FITE {
+						content += fmt.Sprintf("User: %s Mode: %d \n", user._name, user._mode)
 					}
 				}
 			} else {
