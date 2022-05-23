@@ -205,6 +205,24 @@ var (
 	//<------------------->Command Handler Function Creation<------------------->
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"whoami": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content := "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
+
 			id := i.Member.User.ID
 			content := "Your discord user id is: " + string(id)
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -216,6 +234,23 @@ var (
 		},
 		"admins": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var content string
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content = "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
 
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
@@ -238,6 +273,24 @@ var (
 			})
 		},
 		"register-admin": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content := "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
+
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
 
 			var content string
@@ -257,6 +310,24 @@ var (
 			})
 		},
 		"remove-admin": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content := "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
+
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
 			var content string
 
@@ -276,6 +347,24 @@ var (
 			})
 		},
 		"register-fite-user": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content := "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
+
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
 			mode := i.ApplicationCommandData().Options[1].IntValue()
 			var content string
@@ -296,6 +385,24 @@ var (
 			})
 		},
 		"remove-fite-user": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content := "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
+
 			user := i.ApplicationCommandData().Options[0].UserValue(s)
 			var content string
 
@@ -315,6 +422,24 @@ var (
 			})
 		},
 		"register-response": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content := "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
+
 			res := i.ApplicationCommandData().Options[0].StringValue()
 
 			var content string
@@ -336,6 +461,23 @@ var (
 		},
 		"bot-responses": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var content string
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content = "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
 
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
@@ -360,6 +502,23 @@ var (
 		},
 		"fite-targets": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var content string
+
+			check, err := comesFromDM(s, i)
+			if check {
+				log.Println("Message in dm")
+
+				content = "I can only be used in servers ;-("
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf(content),
+					},
+				})
+			}
+			if err != nil {
+				log.Printf("Error checking if interaction is DM: %s \n", err)
+			}
 
 			a, _ := auth.IsAuthed(i.Member.User.ID)
 			if a {
@@ -532,4 +691,15 @@ func removeFite(id string) error {
 		delete(FITE, id)
 	}
 	return nil
+}
+
+func comesFromDM(s *discordgo.Session, i *discordgo.InteractionCreate) (bool, error) {
+	channel, err := s.State.Channel(i.ChannelID)
+	if err != nil {
+		if channel, err = s.Channel(i.ChannelID); err != nil {
+			return false, err
+		}
+	}
+
+	return channel.Type == discordgo.ChannelTypeDM, nil
 }
