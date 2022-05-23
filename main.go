@@ -218,19 +218,21 @@ var (
 						Content: fmt.Sprintf(content),
 					},
 				})
+
+			} else {
+				id := i.Member.User.ID
+				content := "Your discord user id is: " + string(id)
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: content,
+					},
+				})
 			}
 			if err != nil {
 				log.Printf("Error checking if interaction is DM: %s \n", err)
 			}
 
-			id := i.Member.User.ID
-			content := "Your discord user id is: " + string(id)
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: content,
-				},
-			})
 		},
 		"admins": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var content string
